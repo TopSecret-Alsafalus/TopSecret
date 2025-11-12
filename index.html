@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Top Secret</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 2px solid #000;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 300px;
+      height: auto;
+      z-index: 10;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    #mensajeError, #mensajeBienvenida, #contador {
+      margin: 20px auto;
+      font-weight: bold;
+      display: none;
+    }
+
+    #mensajeError {
+      color: red;
+      font-size: 1.5em; /* mensaje de error */
+    }
+
+    #mensajeBienvenida {
+      color: green;
+      font-size: 2em;
+    }
+
+    #contador {
+      color: red; 
+      font-size: 1.2em; /* un poco más pequeño que mensaje de error */
+      margin-top: 15px;
+    }
+
+    #confirmBox {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 30px;
+      width: 400px;
+      height: auto;
+      z-index: 20;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #confirmBox p {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    #confirmBox button {
+      margin: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #confirmYes {
+      background-color: #28a745;
+      color: white;
+    }
+    #confirmYes:hover {
+      background-color: #218838;
+    }
+    #confirmNo {
+      background-color: #dc3545;
+      color: white;
+    }
+    #confirmNo:hover {
+      background-color: #c82333;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 14px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body onload="mostrarPopup()">
+
+<div id="popup">
+  <p>Introduce el código de acceso</p>
+  <p style="font-size: 0.8em; margin-top: 5px;">Pista: Coincide con el año de la toma de Toledo</p>
+  <input type="number" id="num">
+  <br>
+  <button onclick="iniciarConfirmacion()">Aceptar</button>
+</div>
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><p id="mensajeBienvenida">
+  Bienvenido al grupo, Pablo. Te estábamos esperando
+</p>
+
+<p id="mensajeError">
+  Solo aceptamos a amantes de la historia en nuestro grupo
+</p>
+
+<p id="contador"></p>
+
+<div id="confirmBox">
+  <p id="confirmText"></p>
+  <button id="confirmYes">Sí</button>
+  <button id="confirmNo">No</button>
+</div>
+
+<script>
+let pasosConfirmacion = [
+  "1º- ¿Estás seguro de tu respuesta?",
+  "2º- ¿Estás SEGURO de tu respuesta?",
+  "3º- ¿ESTÁS MUY SEGURO DE TU RESPUESTA?"
+];
+let pasoActual = 0;
+let numeroActual = 0;
+
+const baseWidth = 300;       
+const baseHeight = 150;      
+const baseFont = 1.3; 
+const scaleSegundo = 1.7;    
+
+function mostrarPopup() {
+  const popup = document.getElementById('popup');
+  const input = document.getElementById('num');
+  popup.style.display = 'block';
+  input.focus();
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      if (document.getElementById('confirmBox').style.display === 'block') {
+        document.getElementById('confirmYes').click();
+      } else if (popup.style.display === 'block') {
+        iniciarConfirmacion();
+      }
+    }
+  });
+}
+
+function iniciarConfirmacion() {
+  const input = document.getElementById('num');
+  numeroActual = parseInt(input.value);
+  if (isNaN(numeroActual)) return alert("Por favor, introduce un número.");
+  pasoActual = 0;
+  mostrarConfirm();
+}
+
+function mostrarConfirm() {
+  const confirmBox = document.getElementById('confirmBox');
+  const confirmText = document.getElementById('confirmText');
+  const input = document.getElementById('num');
+
+  // Reiniciar confirmBox para evitar bugs
+  confirmBox.style.display = 'block';
+  confirmBox.style.width = baseWidth + "px";
+  confirmBox.style.height = baseHeight + "px";
+  confirmText.style.marginTop = "0";
+
+  let fontSize = baseFont;
+  if (pasoActual === 0) {
+    fontSize = baseFont;
+  } else if (pasoActual === 1) {
+    confirmBox.style.width = baseWidth * scaleSegundo + "px";
+    confirmBox.style.height = baseHeight * scaleSegundo + "px";
+    fontSize = baseFont * scaleSegundo;
+  } else if (pasoActual === 2) {
+    confirmBox.style.width = "100vw";
+    confirmBox.style.height = "100vh";
+    fontSize = 4;
+    confirmText.style.marginTop = "40vh";
+  }
+
+  confirmText.innerText = pasosConfirmacion[pasoActual];
+  confirmText.style.fontSize = fontSize + "em";
+
+  document.getElementById('confirmYes').style.fontSize = (fontSize * 0.9) + "em";
+  document.getElementById('confirmNo').style.fontSize = (fontSize * 0.9) + "em";
+  document.getElementById('confirmYes').style.padding = (fontSize * 8) + "px " + (fontSize * 16) + "px";
+  document.getElementById('confirmNo').style.padding = (fontSize * 8) + "px " + (fontSize * 16) + "px";
+
+  document.getElementById('confirmYes').onclick = function() {
+    pasoActual++;
+    if (pasoActual < pasosConfirmacion.length) {
+      mostrarConfirm();
+    } else {
+      confirmBox.style.display = 'none';
+      comprobar(numeroActual);
+    }
+  };
+
+  document.getElementById('confirmNo').onclick = function() {
+    confirmBox.style.display = 'none';
+    confirmBox.style.width = baseWidth + "px";
+    confirmBox.style.height = baseHeight + "px";
+    confirmText.style.fontSize = baseFont + "em";
+    document.getElementById('confirmYes').style.fontSize = baseFont * 0.9 + "em";
+    document.getElementById('confirmNo').style.fontSize = baseFont * 0.9 + "em";
+    document.getElementById('confirmYes').style.padding = "8px 14px";
+    document.getElementById('confirmNo').style.padding = "8px 14px";
+    input.value = "";
+    input.focus();
+  };
+}
+
+function comprobar(num) {
+  const popup = document.getElementById('popup');
+  const mensajeError = document.getElementById('mensajeError');
+  const mensajeBienvenida = document.getElementById('mensajeBienvenida');
+  const input = document.getElementById('num');
+  const boton = document.querySelector('#popup button');
+  const contador = document.getElementById('contador');
+  const confirmBox = document.getElementById('confirmBox');
+
+  if (num === 1085) {
+    popup.style.display = 'none';
+    mensajeBienvenida.style.display = 'block';
+    setTimeout(() => {
+      window.location.href = "https://www.canva.com/design/DAG4fuxrrP8/NmmFo1L4Y93mxWCKEOlo1Q/view?utm_content=DAG4fuxrrP8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h94100bae2e";
+    }, 2500);
+  } else {
+    // Respuesta incorrecta
+    mensajeError.style.display = 'block';
+    input.disabled = true;
+    boton.disabled = true;
+    confirmBox.style.display = 'none'; // ocultar confirmBox
+    contador.style.display = 'block';
+
+    let tiempo = 7; // contador 7 segundos
+    contador.innerText = `Vuelve a intentarlo en: ${tiempo} s`;
+
+    const interval = setInterval(() => {
+      tiempo--;
+      contador.innerText = `Vuelve a intentarlo en: ${tiempo} s`;
+      if (tiempo === 0) {
+        clearInterval(interval);
+        mensajeError.style.display = 'none';
+        contador.style.display = 'none';
+        input.disabled = false;
+        boton.disabled = false;
+        input.value = '';
+        input.focus();
+
+        // Reiniciar confirmBox para el siguiente intento
+        confirmBox.style.display = 'none';
+        confirmBox.style.width = baseWidth + "px";
+        confirmBox.style.height = baseHeight + "px";
+        confirmText.style.marginTop = "0";
+      }
+    }, 1000);
+  }
+}
+</script>
+
+</body>
+</html>
